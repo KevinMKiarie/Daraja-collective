@@ -1,4 +1,7 @@
 import { Command } from 'commander'
+import { existsSync } from 'fs'
+import { join } from 'path'
+import { homedir } from 'os'
 import chalk from 'chalk'
 import { loadConfig, BASE_URLS } from '../config/index.js'
 import { fetchOAuthToken } from '../api/auth.js'
@@ -88,6 +91,22 @@ export const doctorCommand = new Command('doctor')
         'Only one of initiatorName / initiatorPassword is set',
         'Both are required together',
       )
+    }
+
+    // Security certificate (only matters if initiator creds are set)
+    if (config.initiatorName && config.initiatorPassword) {
+      const environment = config.environment ?? 'sandbox'
+      const certFile = environment === 'sandbox' ? 'sandbox.cer' : 'production.cer'
+      const certPath = join(homedir(), '.daraja', 'certs', certFile)
+      if (existsSync(certPath)) {
+        pass('Security certificate found', certPath)
+      } else {
+        fail(
+          `Security certificate not found (${certFile})`,
+          'Run `daraja keygen security` to download it',
+        )
+        hasErrors = true
+      }
     }
 
     // Callback URL (optional, warn)

@@ -1,11 +1,10 @@
 import { publicEncrypt, constants } from 'crypto'
 import { readFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { join } from 'path'
+import { homedir } from 'os'
 import { ValidationError } from '../errors/index.js'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const CERTS_DIR = join(__dirname, '..', '..', 'certs')
+const CERTS_DIR = join(homedir(), '.daraja', 'certs')
 
 export function generateStkPassword(
   shortcode: string,
