@@ -24,7 +24,7 @@ jobs:
         with:
           # Full history so semantic-release can read all commits since last tag
           fetch-depth: 0
-          persist-credentials: false
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Setup Node 22
         uses: actions/setup-node@v4
