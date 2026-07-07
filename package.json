@@ -1,0 +1,57 @@
+{
+  "name": "@daraja/cli",
+  "version": "0.1.0",
+  "description": "The official CLI for M-Pesa Daraja API — batteries included for every Kenyan developer",
+  "keywords": ["mpesa", "daraja", "safaricom", "kenya", "payments", "cli", "fintech"],
+  "author": "Daraja Collective",
+  "license": "MIT",
+  "homepage": "https://github.com/daraja-collective/cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daraja-collective/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/daraja-collective/cli/issues"
+  },
+  "type": "module",
+  "bin": {
+    "daraja": "./dist/index.js"
+  },
+  "files": ["dist", "CHANGELOG.md"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src tests --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "ora": "^8.1.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "semantic-release": "^24.0.0",
+    "tsup": "^8.2.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
