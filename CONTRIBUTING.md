@@ -102,3 +102,4 @@ The API layer (`src/api/`) should be a thin wrapper — no business logic, just 
 ## Releasing
 
 Releases are fully automated. Merging to `main` triggers semantic-release, which reads your commit messages, bumps the version, updates `CHANGELOG.md`, creates a GitHub Release, and publishes to npm. You don't need to do anything manually.
+`
