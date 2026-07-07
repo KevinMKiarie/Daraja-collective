@@ -9,7 +9,10 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
       include: ['src/**/*.ts'],
-      exclude: ['src/index.ts'],
+      // Commands are CLI integration-level code — testing them requires
+      // mocking the full commander.js action pipeline. They are covered
+      // by integration tests, not unit tests.
+      exclude: ['src/index.ts', 'src/global.d.ts', 'src/commands/**'],
       thresholds: {
         lines: 80,
         functions: 80,
