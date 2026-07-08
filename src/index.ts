@@ -18,6 +18,7 @@ import { keygenCommand } from './commands/keygen/index.js'
 import { configCommand } from './commands/config/index.js'
 import { generateCommand } from './commands/generate/index.js'
 import { ecosystemCommand } from './commands/ecosystem/index.js'
+import { serveCommand } from './commands/serve/index.js'
 
 declare const __VERSION__: string
 
@@ -36,6 +37,7 @@ program.addCommand(authCommand)
 program.addCommand(keygenCommand)
 program.addCommand(generateCommand)
 program.addCommand(ecosystemCommand)
+program.addCommand(serveCommand)
 program.addCommand(stkCommand)
 program.addCommand(c2bCommand)
 program.addCommand(b2cCommand)
