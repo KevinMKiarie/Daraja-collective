@@ -15,6 +15,7 @@ import { webhookCommand } from './commands/webhook/index.js'
 import { doctorCommand } from './commands/doctor.js'
 import { initCommand } from './commands/init.js'
 import { keygenCommand } from './commands/keygen/index.js'
+import { configCommand } from './commands/config/index.js'
 
 declare const __VERSION__: string
 
@@ -28,6 +29,7 @@ program
 
 program.addCommand(initCommand)
 program.addCommand(doctorCommand)
+program.addCommand(configCommand)
 program.addCommand(authCommand)
 program.addCommand(keygenCommand)
 program.addCommand(stkCommand)
