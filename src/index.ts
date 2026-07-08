@@ -16,6 +16,7 @@ import { doctorCommand } from './commands/doctor.js'
 import { initCommand } from './commands/init.js'
 import { keygenCommand } from './commands/keygen/index.js'
 import { configCommand } from './commands/config/index.js'
+import { generateCommand } from './commands/generate/index.js'
 
 declare const __VERSION__: string
 
@@ -32,6 +33,7 @@ program.addCommand(doctorCommand)
 program.addCommand(configCommand)
 program.addCommand(authCommand)
 program.addCommand(keygenCommand)
+program.addCommand(generateCommand)
 program.addCommand(stkCommand)
 program.addCommand(c2bCommand)
 program.addCommand(b2cCommand)
