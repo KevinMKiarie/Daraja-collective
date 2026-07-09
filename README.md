@@ -340,7 +340,20 @@ daraja generate env --platform docker --output docker-compose.yml
 daraja generate list
 ```
 
-**Supported stacks:** `express` · `express-ts` · `fastify` · `nextjs` · `fastapi` · `flask` · `django` · `laravel` · `gin` · `rails` · `aspnet`
+**Supported stacks:**
+
+| Language | Stacks |
+|----------|--------|
+| Node.js | `express` · `express-ts` · `fastify` · `nextjs` |
+| Python | `fastapi` · `flask` · `django` |
+| PHP | `laravel` |
+| Go | `gin` |
+| Ruby | `rails` |
+| C# | `aspnet` |
+| Elixir | `phoenix` |
+| Kotlin | `ktor` |
+| Java | `spring` |
+| Swift | `vapor` |
 
 **Supported platforms:** `dotenv` · `github-actions` · `vercel` · `docker` · `railway`
 
@@ -472,7 +485,7 @@ daraja ecosystem recommend  # get a personalised recommendation
 
 ### 2. REST proxy (available now)
 
-`daraja serve` handles all Daraja communication. Your app makes plain HTTP calls.
+`daraja serve` handles all Daraja communication. Your app makes plain HTTP calls — no OAuth, no certificates, no M-Pesa SDK required. Works with every language.
 
 ```bash
 daraja serve &
@@ -481,13 +494,53 @@ curl -s -X POST http://localhost:8080/stk/push \
   -d '{"phone":"0712345678","amount":100,"reference":"INV-001","description":"Payment"}'
 ```
 
+**Language examples using `daraja serve`:**
+
+```elixir
+# Elixir — HTTPoison
+HTTPoison.post("http://localhost:8080/stk/push", Jason.encode!(%{phone: "0712345678", amount: 100}), [{"Content-Type", "application/json"}])
+```
+
+```kotlin
+// Kotlin — Ktor HttpClient
+client.post("http://localhost:8080/stk/push") {
+    contentType(ContentType.Application.Json)
+    setBody(mapOf("phone" to "0712345678", "amount" to 100))
+}
+```
+
+```java
+// Java — Spring RestTemplate
+restTemplate.postForObject("http://localhost:8080/stk/push",
+    Map.of("phone", "0712345678", "amount", 100), Map.class);
+```
+
+```swift
+// Swift — URLSession
+var req = URLRequest(url: URL(string: "http://localhost:8080/stk/push")!)
+req.httpMethod = "POST"
+req.httpBody = try JSONSerialization.data(withJSONObject: ["phone": "0712345678", "amount": 100])
+let (data, _) = try await URLSession.shared.data(for: req)
+```
+
+```dart
+// Dart / Flutter — http package
+await http.post(Uri.parse('http://localhost:8080/stk/push'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'phone': '0712345678', 'amount': 100}));
+```
+
 ### 3. Code scaffold
 
-`daraja generate` drops working webhook handler code into your project.
+`daraja generate` drops production-ready webhook handler code into your project for 15 frameworks across 10 languages.
 
 ```bash
-daraja generate stk-callback --stack rails --output app/controllers/mpesa_controller.rb
-daraja generate c2b --stack laravel --output app/Http/Controllers/MpesaC2BController.php
+daraja generate stk-callback --stack phoenix  --output lib/your_app_web/controllers/mpesa_controller.ex
+daraja generate stk-callback --stack ktor     --output src/main/kotlin/com/yourapp/routes/MpesaRoutes.kt
+daraja generate stk-callback --stack spring   --output src/main/java/com/yourapp/controller/MpesaController.java
+daraja generate stk-callback --stack vapor    --output Sources/App/Controllers/MpesaController.swift
+daraja generate stk-callback --stack rails    --output app/controllers/mpesa_controller.rb
+daraja generate c2b          --stack laravel  --output app/Http/Controllers/MpesaC2BController.php
 ```
 
 ---
