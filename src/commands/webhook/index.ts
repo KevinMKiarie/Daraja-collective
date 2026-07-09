@@ -2,7 +2,7 @@ import { Command } from 'commander'
 import { createServer } from 'http'
 import type { IncomingMessage, ServerResponse } from 'http'
 import { writeFileSync, readFileSync, existsSync } from 'fs'
-import { join, resolve } from 'path'
+import { resolve } from 'path'
 import chalk from 'chalk'
 import { info, success, warn, error } from '../../output/index.js'
 

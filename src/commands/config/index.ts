@@ -86,7 +86,7 @@ configCommand
     if (opts.format === 'json') {
       const out: Record<string, string | undefined> = {}
       for (const key of VALID_KEYS) {
-        const val = config[key] as string | undefined
+        const val = config[key]
         out[key] = val && SECRET_KEYS.has(key) && !opts.reveal ? mask(val) : val
       }
       process.stdout.write(JSON.stringify(out, null, 2) + '\n')
@@ -106,7 +106,7 @@ configCommand
     const maxKey = Math.max(...VALID_KEYS.map((k) => k.length))
 
     for (const key of VALID_KEYS) {
-      const val = config[key] as string | undefined
+      const val = config[key]
       const display =
         val === undefined
           ? chalk.dim('(not set)')
@@ -140,7 +140,7 @@ configCommand
     }
 
     const config = loadConfig()
-    const val = config[key as ConfigKey] as string | undefined
+    const val = config[key as ConfigKey]
 
     if (val === undefined) {
       warn(`${key} is not set`)
@@ -215,9 +215,7 @@ configCommand
 
     let existing: PartialDarajaConfig = {}
     try {
-      existing = JSON.parse(
-        require('fs').readFileSync(configPath, 'utf-8'),
-      ) as PartialDarajaConfig
+      existing = readConfigFile(configPath)
     } catch {
       warn('Could not parse config file')
       return
@@ -228,7 +226,9 @@ configCommand
       return
     }
 
-    const { [key as ConfigKey]: _removed, ...rest } = existing
+    const rest = Object.fromEntries(
+      Object.entries(existing).filter(([k]) => k !== key),
+    ) as PartialDarajaConfig
     writeConfigFile(configPath, rest)
     success(`Removed ${key} from ${configPath}`)
   })

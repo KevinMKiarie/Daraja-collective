@@ -15,54 +15,54 @@ _daraja_completions() {
 
   case "\${prev}" in
     daraja)
-      COMPREPLY=( \$(compgen -W "\${commands}" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "\${commands}" -- "\${cur}") )
       return ;;
     config)
-      COMPREPLY=( \$(compgen -W "list get set unset path keys" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "list get set unset path keys" -- "\${cur}") )
       return ;;
     generate|gen)
-      COMPREPLY=( \$(compgen -W "stk-callback c2b env list" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "stk-callback c2b env list" -- "\${cur}") )
       return ;;
     stk-callback|c2b)
       if [[ "\${COMP_WORDS[1]}" == "generate" || "\${COMP_WORDS[1]}" == "gen" ]]; then
-        COMPREPLY=( \$(compgen -W "--stack --output --list" -- "\${cur}") )
+        COMPREPLY=( $(compgen -W "--stack --output --list" -- "\${cur}") )
         return
       fi ;;
     env)
       if [[ "\${COMP_WORDS[1]}" == "generate" || "\${COMP_WORDS[1]}" == "gen" ]]; then
-        COMPREPLY=( \$(compgen -W "--platform --output --list" -- "\${cur}") )
+        COMPREPLY=( $(compgen -W "--platform --output --list" -- "\${cur}") )
         return
       fi ;;
     --stack)
-      COMPREPLY=( \$(compgen -W "express express-ts fastify nextjs fastapi flask django laravel gin rails aspnet" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "express express-ts fastify nextjs fastapi flask django laravel gin rails aspnet" -- "\${cur}") )
       return ;;
     --platform)
-      COMPREPLY=( \$(compgen -W "dotenv github-actions vercel docker railway" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "dotenv github-actions vercel docker railway" -- "\${cur}") )
       return ;;
     ecosystem|eco)
-      COMPREPLY=( \$(compgen -W "list recommend show compare status" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "list recommend show compare status" -- "\${cur}") )
       return ;;
     stk)
-      COMPREPLY=( \$(compgen -W "push query" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "push query" -- "\${cur}") )
       return ;;
     auth)
-      COMPREPLY=( \$(compgen -W "token clear" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "token clear" -- "\${cur}") )
       return ;;
     keygen)
-      COMPREPLY=( \$(compgen -W "security passkey" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "security passkey" -- "\${cur}") )
       return ;;
     webhook)
-      COMPREPLY=( \$(compgen -W "serve replay list" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "serve replay list" -- "\${cur}") )
       return ;;
     c2b)
-      COMPREPLY=( \$(compgen -W "register simulate" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "register simulate" -- "\${cur}") )
       return ;;
     completions)
-      COMPREPLY=( \$(compgen -W "bash zsh fish" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "bash zsh fish" -- "\${cur}") )
       return ;;
   esac
 
-  COMPREPLY=( \$(compgen -W "\${commands}" -- "\${cur}") )
+  COMPREPLY=( $(compgen -W "\${commands}" -- "\${cur}") )
 }
 
 complete -F _daraja_completions daraja
@@ -82,7 +82,7 @@ _daraja() {
     '1: :->command' \\
     '*: :->args'
 
-  case \$state in
+  case $state in
     command)
       local commands=(
         'init:Interactively set up Daraja credentials'
@@ -113,7 +113,7 @@ _daraja() {
       )
       _describe 'daraja commands' commands ;;
     args)
-      case \$words[2] in
+      case $words[2] in
         config)
           local subcommands=('list' 'get' 'set' 'unset' 'path' 'keys')
           _describe 'config subcommands' subcommands ;;

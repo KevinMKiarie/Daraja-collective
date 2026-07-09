@@ -176,7 +176,7 @@ ecosystemCommand
     const neededFeatures = await checkbox({
       message: 'Which M-Pesa features do you need?',
       choices: ALL_FEATURES.map((f) => ({ name: FEATURE_LABELS[f], value: f, checked: f === 'stk-push' })),
-    }) as Feature[]
+    })
 
     const forProduction = await select({
       message: 'Is this for production or just prototyping?',

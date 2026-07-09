@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { select } from '@inquirer/prompts'
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
-import { dirname, join } from 'path'
+import { dirname } from 'path'
 import chalk from 'chalk'
 import {
   generateStkCallback,
@@ -69,7 +69,7 @@ generateCommand
         message: 'Select your framework:',
         choices: SUPPORTED_STACKS.map((s) => ({ name: STACK_LABELS[s], value: s })),
       })
-    } else if (!SUPPORTED_STACKS.includes(stack as Stack)) {
+    } else if (!SUPPORTED_STACKS.includes(stack)) {
       error(
         `Unknown stack: ${stack}`,
         `Supported: ${SUPPORTED_STACKS.join(', ')}. Run with --list to see all options.`,
@@ -122,7 +122,7 @@ generateCommand
         message: 'Select your framework:',
         choices: SUPPORTED_STACKS.map((s) => ({ name: STACK_LABELS[s], value: s })),
       })
-    } else if (!SUPPORTED_STACKS.includes(stack as Stack)) {
+    } else if (!SUPPORTED_STACKS.includes(stack)) {
       error(
         `Unknown stack: ${stack}`,
         `Supported: ${SUPPORTED_STACKS.join(', ')}. Run with --list to see all options.`,
@@ -178,7 +178,7 @@ generateCommand
         message: 'Select your deployment platform:',
         choices: SUPPORTED_PLATFORMS.map((p) => ({ name: PLATFORM_LABELS[p], value: p })),
       })
-    } else if (!SUPPORTED_PLATFORMS.includes(platform as EnvPlatform)) {
+    } else if (!SUPPORTED_PLATFORMS.includes(platform)) {
       error(
         `Unknown platform: ${platform}`,
         `Supported: ${SUPPORTED_PLATFORMS.join(', ')}. Run with --list to see all options.`,

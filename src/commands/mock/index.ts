@@ -72,7 +72,7 @@ const MOCK_ROUTES: Record<string, MockHandler> = {
     CheckoutRequestID:  randomId('ws_CO'),
     ResponseCode:       '0',
     ResponseDescription: 'Success. Request accepted for processing',
-    CustomerMessage:    `Dear ${body['PhoneNumber'] ?? 'customer'}, please enter your M-PESA PIN to complete the transaction.`,
+    CustomerMessage:    `Dear ${String(body['PhoneNumber'] ?? 'customer')}, please enter your M-PESA PIN to complete the transaction.`,
   }),
 
   // STK Push query
@@ -96,7 +96,7 @@ const MOCK_ROUTES: Record<string, MockHandler> = {
   'POST /mpesa/c2b/v1/simulate': (body) => ({
     OriginatorCoversationID: randomId('AG'),
     ConversationID:          randomId('AG'),
-    ResponseDescription:     `Accept the service request successfully. Amount: ${body['Amount'] ?? 0}`,
+    ResponseDescription:     `Accept the service request successfully. Amount: ${String(body['Amount'] ?? 0)}`,
   }),
 
   // B2C
@@ -273,7 +273,8 @@ export const mockCommand = new Command('mock')
       }
     }
 
-    const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+    const server = createServer((req: IncomingMessage, res: ServerResponse): void => {
+      void (async (): Promise<void> => {
       const url    = new URL(req.url ?? '/', `http://localhost:${port}`)
       const method = (req.method ?? 'GET').toUpperCase()
       const path   = url.pathname
@@ -319,6 +320,7 @@ export const mockCommand = new Command('mock')
 
       send(res, 200, responseBody)
       process.stdout.write(chalk.dim(`  [mock] ${label} ${path} → 200\n`))
+      })()
     })
 
     server.listen(port, '127.0.0.1', () => {

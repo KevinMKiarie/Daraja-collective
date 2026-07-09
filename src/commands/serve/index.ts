@@ -75,7 +75,7 @@ function fail(res: ServerResponse, status: number, message: string, hint?: strin
 function route(method: string, path: string, handler: RouteHandler): Route {
   const paramNames: string[] = []
   const pattern = new RegExp(
-    '^' + path.replace(/:([a-zA-Z]+)/g, (_, name) => { paramNames.push(name); return '([^/]+)' }) + '$',
+    '^' + path.replace(/:([a-zA-Z]+)/g, (_: string, name: string) => { paramNames.push(name); return '([^/]+)' }) + '$',
   )
   return { method: method.toUpperCase(), pattern, paramNames, handler }
 }
@@ -85,7 +85,7 @@ function route(method: string, path: string, handler: RouteHandler): Route {
 function buildRoutes(): Route[] {
   return [
     // Health
-    route('GET', '/health', async (_b, _p, _c, config) => ({
+    route('GET', '/health', (_b, _p, _c, config) => Promise.resolve({
       status: 'ok',
       environment: config.environment,
       shortcode: config.shortcode,
@@ -383,7 +383,8 @@ export const serveCommand = new Command('serve')
     const client = new DarajaClient(config, { ...(opts.debug ? { debug: true } : {}) })
     const routes = buildRoutes()
 
-    const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
+    const server = createServer((req: IncomingMessage, res: ServerResponse): void => {
+      void (async (): Promise<void> => {
       const url    = new URL(req.url ?? '/', `http://${host}:${port}`)
       const method = req.method ?? 'GET'
       const path   = url.pathname
@@ -429,6 +430,7 @@ export const serveCommand = new Command('serve')
           fail(res, 500, err instanceof Error ? err.message : 'Unexpected error')
         }
       }
+      })()
     })
 
     server.listen(port, host, () => {
