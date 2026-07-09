@@ -118,6 +118,38 @@ describe('generateStkCallback', () => {
     it('uses ILogger', () => expect(file.content).toContain('ILogger'))
     it('processes asynchronously with Task.Run', () => expect(file.content).toContain('Task.Run'))
   })
+
+  describe('phoenix', () => {
+    const file = generateStkCallback('phoenix')
+    it('language is elixir', () => expect(file.language).toBe('elixir'))
+    it('uses defmodule', () => expect(file.content).toContain('defmodule'))
+    it('uses Logger', () => expect(file.content).toContain('Logger'))
+    it('includes router.ex comment', () => expect(file.content).toContain('router.ex'))
+  })
+
+  describe('ktor', () => {
+    const file = generateStkCallback('ktor')
+    it('language is kotlin', () => expect(file.language).toBe('kotlin'))
+    it('uses @Serializable', () => expect(file.content).toContain('@Serializable'))
+    it('uses launch for async processing', () => expect(file.content).toContain('launch'))
+    it('includes configureMpesaRoutes', () => expect(file.content).toContain('configureMpesaRoutes'))
+  })
+
+  describe('spring', () => {
+    const file = generateStkCallback('spring')
+    it('language is java', () => expect(file.language).toBe('java'))
+    it('uses @RestController', () => expect(file.content).toContain('@RestController'))
+    it('uses CompletableFuture', () => expect(file.content).toContain('CompletableFuture'))
+    it('uses @PostMapping', () => expect(file.content).toContain('@PostMapping'))
+  })
+
+  describe('vapor', () => {
+    const file = generateStkCallback('vapor')
+    it('language is swift', () => expect(file.language).toBe('swift'))
+    it('uses Content protocol', () => expect(file.content).toContain('Content'))
+    it('uses async throws', () => expect(file.content).toContain('async throws'))
+    it('includes configure.swift comment', () => expect(file.content).toContain('configure.swift'))
+  })
 })
 
 // ─── generateC2BWebhook ───────────────────────────────────────────────────────
@@ -176,6 +208,37 @@ describe('generateC2BWebhook', () => {
       expect(file.content).toContain('func C2BValidate')
       expect(file.content).toContain('func C2BConfirm')
     })
+  })
+
+  describe('phoenix', () => {
+    const file = generateC2BWebhook('phoenix')
+    it('language is elixir', () => expect(file.language).toBe('elixir'))
+    it('uses defmodule', () => expect(file.content).toContain('defmodule'))
+    it('uses Logger', () => expect(file.content).toContain('Logger'))
+    it('includes router.ex comment', () => expect(file.content).toContain('router.ex'))
+  })
+
+  describe('ktor', () => {
+    const file = generateC2BWebhook('ktor')
+    it('language is kotlin', () => expect(file.language).toBe('kotlin'))
+    it('uses @Serializable or routing DSL', () => expect(file.content).toContain('configureMpesaC2BRoutes'))
+    it('uses launch or logging', () => expect(file.content).toContain('c2bLogger'))
+    it('includes configureMpesaC2BRoutes', () => expect(file.content).toContain('configureMpesaC2BRoutes'))
+  })
+
+  describe('spring', () => {
+    const file = generateC2BWebhook('spring')
+    it('language is java', () => expect(file.language).toBe('java'))
+    it('uses @RestController', () => expect(file.content).toContain('@RestController'))
+    it('uses @PostMapping', () => expect(file.content).toContain('@PostMapping'))
+  })
+
+  describe('vapor', () => {
+    const file = generateC2BWebhook('vapor')
+    it('language is swift', () => expect(file.language).toBe('swift'))
+    it('uses Content protocol', () => expect(file.content).toContain('Content'))
+    it('uses async throws', () => expect(file.content).toContain('async throws'))
+    it('includes configure.swift comment', () => expect(file.content).toContain('configure.swift'))
   })
 })
 

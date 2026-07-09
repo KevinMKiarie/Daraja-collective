@@ -10,6 +10,10 @@ export type Stack =
   | 'gin'
   | 'rails'
   | 'aspnet'
+  | 'phoenix'
+  | 'ktor'
+  | 'spring'
+  | 'vapor'
 
 export type EnvPlatform = 'dotenv' | 'github-actions' | 'vercel' | 'docker' | 'railway'
 
@@ -31,6 +35,10 @@ export const SUPPORTED_STACKS: Stack[] = [
   'gin',
   'rails',
   'aspnet',
+  'phoenix',
+  'ktor',
+  'spring',
+  'vapor',
 ]
 
 export const SUPPORTED_PLATFORMS: EnvPlatform[] = [
@@ -53,6 +61,10 @@ export const STACK_LABELS: Record<Stack, string> = {
   'gin': 'Go + Gin',
   'rails': 'Ruby on Rails',
   'aspnet': 'ASP.NET Core (C#)',
+  'phoenix': 'Elixir + Phoenix',
+  'ktor':    'Kotlin + Ktor',
+  'spring':  'Java + Spring Boot',
+  'vapor':   'Swift + Vapor',
 }
 
 export const PLATFORM_LABELS: Record<EnvPlatform, string> = {
@@ -1376,6 +1388,543 @@ public record C2BPayload(
 }
 
 // ---------------------------------------------------------------------------
+// Phoenix (Elixir) templates
+// ---------------------------------------------------------------------------
+
+function stkPhoenix(): GeneratedFile {
+  return {
+    filename: 'lib/your_app_web/controllers/mpesa_controller.ex',
+    language: 'elixir',
+    content: `defmodule YourAppWeb.MpesaController do
+  use YourAppWeb, :controller
+  require Logger
+
+  # POST /mpesa/stk-callback
+  # Daraja delivers the payment result here after an STK Push completes or fails.
+  # Respond with 200 immediately — Daraja retries if it waits more than 5 seconds.
+  def stk_callback(conn, %{"Body" => %{"stkCallback" => callback}}) do
+    Task.start(fn -> handle_stk_result(callback) end)
+    json(conn, %{ResultCode: 0, ResultDesc: "Accepted"})
+  end
+
+  def stk_callback(conn, _params) do
+    json(conn, %{ResultCode: 0, ResultDesc: "Accepted"})
+  end
+
+  defp handle_stk_result(callback) do
+    result_code = callback["ResultCode"]
+    merchant_id = callback["MerchantRequestID"]
+    checkout_id = callback["CheckoutRequestID"]
+
+    if result_code != 0 do
+      Logger.error("STK Push failed: #{callback["ResultDesc"]} (merchant=#{merchant_id}, checkout=#{checkout_id})")
+    else
+      meta =
+        callback
+        |> get_in(["CallbackMetadata", "Item"])
+        |> Kernel.||([] )
+        |> Enum.reduce(%{}, fn %{"Name" => k, "Value" => v}, acc -> Map.put(acc, k, v) end)
+
+      receipt = meta["MpesaReceiptNumber"]
+      amount  = meta["Amount"]
+      phone   = meta["PhoneNumber"]
+      paid_at = meta["TransactionDate"]  # YYYYMMDDHHmmss
+
+      Logger.info("Payment confirmed: receipt=#{receipt} amount=#{amount} phone=#{phone} at=#{paid_at} checkout=#{checkout_id}")
+      # TODO: mark the corresponding order as paid in your database
+    end
+  end
+end
+
+# lib/your_app_web/router.ex — add inside a scope block:
+# scope "/", YourAppWeb do
+#   pipe_through :api
+#   post "/mpesa/stk-callback", MpesaController, :stk_callback
+# end
+`,
+  }
+}
+
+function stkKtor(): GeneratedFile {
+  return {
+    filename: 'src/main/kotlin/com/yourapp/routes/MpesaRoutes.kt',
+    language: 'kotlin',
+    content: `package com.yourapp.routes
+
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("MpesaRoutes")
+
+// ── Models ─────────────────────────────────────────────────────────────────
+
+@Serializable
+data class StkCallbackItem(val Name: String, val Value: JsonElement? = null)
+
+@Serializable
+data class StkCallbackMetadata(val Item: List<StkCallbackItem> = emptyList())
+
+@Serializable
+data class StkCallback(
+    val ResultCode: Int,
+    val ResultDesc: String,
+    val MerchantRequestID: String,
+    val CheckoutRequestID: String,
+    val CallbackMetadata: StkCallbackMetadata? = null
+)
+
+@Serializable
+data class StkCallbackBody(val stkCallback: StkCallback)
+
+@Serializable
+data class StkCallbackRequest(val Body: StkCallbackBody)
+
+// ── Route ──────────────────────────────────────────────────────────────────
+
+fun Application.configureMpesaRoutes() {
+    routing {
+        // POST /mpesa/stk-callback
+        // Daraja delivers the payment result here after an STK Push completes or fails.
+        // Respond immediately — Daraja retries if you take more than 5 seconds.
+        post("/mpesa/stk-callback") {
+            val payload = call.receive<StkCallbackRequest>()
+
+            // Acknowledge before processing
+            call.respond(mapOf("ResultCode" to 0, "ResultDesc" to "Accepted"))
+
+            val cb = payload.Body.stkCallback
+
+            launch {
+                if (cb.ResultCode != 0) {
+                    logger.error("STK Push failed: \${cb.ResultDesc} (merchant=\${cb.MerchantRequestID}, checkout=\${cb.CheckoutRequestID})")
+                    return@launch
+                }
+
+                val meta = cb.CallbackMetadata?.Item
+                    ?.associate { it.Name to it.Value?.toString() }
+                    ?: emptyMap()
+
+                val receipt = meta["MpesaReceiptNumber"]
+                val amount  = meta["Amount"]
+                val phone   = meta["PhoneNumber"]
+                val paidAt  = meta["TransactionDate"] // YYYYMMDDHHmmss
+
+                logger.info("Payment confirmed: receipt=$receipt amount=$amount phone=$phone at=$paidAt checkout=\${cb.CheckoutRequestID}")
+                // TODO: mark the corresponding order as paid in your database
+            }
+        }
+    }
+}
+
+// Application.kt — call inside module():
+// configureMpesaRoutes()
+`,
+  }
+}
+
+function stkSpring(): GeneratedFile {
+  return {
+    filename: 'src/main/java/com/yourapp/controller/MpesaController.java',
+    language: 'java',
+    content: `package com.yourapp.controller;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+/**
+ * POST /mpesa/stk-callback
+ * Daraja delivers the payment result here after an STK Push completes or fails.
+ * Return 200 immediately — Daraja retries if it waits more than 5 seconds.
+ */
+@RestController
+@RequestMapping("/mpesa")
+public class MpesaController {
+
+    private static final Logger log = LoggerFactory.getLogger(MpesaController.class);
+
+    @PostMapping("/stk-callback")
+    public ResponseEntity<Map<String, Object>> stkCallback(@RequestBody StkCallbackRequest request) {
+        CompletableFuture.runAsync(() -> handlePaymentResult(request));
+        return ResponseEntity.ok(Map.of("ResultCode", 0, "ResultDesc", "Accepted"));
+    }
+
+    private void handlePaymentResult(StkCallbackRequest request) {
+        var cb = request.body() != null ? request.body().stkCallback() : null;
+        if (cb == null) return;
+
+        if (cb.resultCode() != 0) {
+            log.error("STK Push failed: {} (merchant={}, checkout={})",
+                cb.resultDesc(), cb.merchantRequestId(), cb.checkoutRequestId());
+            return;
+        }
+
+        var meta = cb.callbackMetadata() != null
+            ? cb.callbackMetadata().item().stream()
+                .collect(Collectors.toMap(CallbackItem::name, i -> String.valueOf(i.value())))
+            : Map.<String, String>of();
+
+        log.info("Payment confirmed: receipt={} amount={} phone={} at={} checkout={}",
+            meta.get("MpesaReceiptNumber"), meta.get("Amount"),
+            meta.get("PhoneNumber"),        meta.get("TransactionDate"),
+            cb.checkoutRequestId());
+        // TODO: mark the corresponding order as paid in your database
+    }
+
+    // ─── Models ───────────────────────────────────────────────────────────────
+
+    public record StkCallbackRequest(
+        @JsonProperty("Body") StkCallbackBody body) {}
+
+    public record StkCallbackBody(
+        @JsonProperty("stkCallback") StkCallback stkCallback) {}
+
+    public record StkCallback(
+        @JsonProperty("ResultCode")        int    resultCode,
+        @JsonProperty("ResultDesc")        String resultDesc,
+        @JsonProperty("MerchantRequestID") String merchantRequestId,
+        @JsonProperty("CheckoutRequestID") String checkoutRequestId,
+        @JsonProperty("CallbackMetadata")  CallbackMetadata callbackMetadata) {}
+
+    public record CallbackMetadata(
+        @JsonProperty("Item") List<CallbackItem> item) {}
+
+    public record CallbackItem(
+        @JsonProperty("Name")  String name,
+        @JsonProperty("Value") Object value) {}
+}
+`,
+  }
+}
+
+function stkVapor(): GeneratedFile {
+  return {
+    filename: 'Sources/App/Controllers/MpesaController.swift',
+    language: 'swift',
+    content: `import Vapor
+
+// MARK: - Models
+
+struct StkCallbackRequest: Content {
+    let Body: StkCallbackBody
+}
+
+struct StkCallbackBody: Content {
+    let stkCallback: StkCallback
+}
+
+struct StkCallback: Content {
+    let ResultCode: Int
+    let ResultDesc: String
+    let MerchantRequestID: String
+    let CheckoutRequestID: String
+    let CallbackMetadata: StkCallbackMetadata?
+}
+
+struct StkCallbackMetadata: Content {
+    let Item: [StkCallbackItem]
+}
+
+// M-Pesa returns mixed types for Item.Value (String/Int/Double) — decode flexibly
+struct StkCallbackItem: Content {
+    let Name: String
+    let value: String
+
+    enum CodingKeys: String, CodingKey { case Name, value = "Value" }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        Name = try c.decode(String.self, forKey: .Name)
+        if      let s = try? c.decode(String.self, forKey: .value) { value = s }
+        else if let i = try? c.decode(Int.self,    forKey: .value) { value = String(i) }
+        else if let d = try? c.decode(Double.self, forKey: .value) { value = String(d) }
+        else { value = "" }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(Name,  forKey: .Name)
+        try c.encode(value, forKey: .value)
+    }
+}
+
+struct MpesaAck: Content {
+    let ResultCode: Int
+    let ResultDesc: String
+}
+
+// MARK: - Route handler
+
+func stkCallback(req: Request) async throws -> MpesaAck {
+    let payload = try req.content.decode(StkCallbackRequest.self)
+    let cb      = payload.Body.stkCallback
+
+    let ack = MpesaAck(resultCode: 0, resultDesc: "Accepted")
+
+    if cb.ResultCode != 0 {
+        req.logger.error("STK Push failed: \\(cb.ResultDesc) checkout=\\(cb.CheckoutRequestID)")
+        return ack
+    }
+
+    let meta = Dictionary(uniqueKeysWithValues:
+        (cb.CallbackMetadata?.Item ?? []).map { ($0.Name, $0.value) }
+    )
+
+    req.logger.info("Payment confirmed: receipt=" + (meta["MpesaReceiptNumber"] ?? "?") +
+        " amount=" + (meta["Amount"] ?? "?") +
+        " phone="  + (meta["PhoneNumber"] ?? "?") +
+        " checkout=" + cb.CheckoutRequestID)
+    // TODO: mark the corresponding order as paid in your database
+
+    return ack
+}
+
+// Sources/App/configure.swift — register the route:
+// app.post("mpesa", "stk-callback", use: stkCallback)
+`,
+  }
+}
+
+function c2bPhoenix(): GeneratedFile {
+  return {
+    filename: 'lib/your_app_web/controllers/mpesa_c2b_controller.ex',
+    language: 'elixir',
+    content: `defmodule YourAppWeb.MpesaC2BController do
+  use YourAppWeb, :controller
+  require Logger
+
+  # POST /mpesa/c2b/validate
+  # Daraja calls this before processing a till/paybill payment.
+  # Return ResultCode 0 to accept or a non-zero code to reject.
+  # You have roughly 8 seconds to respond.
+  def validate(conn, params) do
+    trans_id = params["TransID"]
+    amount   = params["TransAmount"]
+    msisdn   = params["MSISDN"]
+    bill_ref = params["BillRefNumber"]
+
+    Logger.info("C2B validate: TransID=#{trans_id} amount=#{amount} phone=#{msisdn} ref=#{bill_ref}")
+
+    # TODO: validate bill reference against your records
+    # Return a non-zero ResultCode to reject the payment
+    json(conn, %{ResultCode: 0, ResultDesc: "Accepted"})
+  end
+
+  # POST /mpesa/c2b/confirm
+  # Daraja posts the confirmed payment here after funds settle.
+  # Return 200 immediately — this is informational.
+  def confirm(conn, params) do
+    trans_id = params["TransID"]
+    amount   = params["TransAmount"]
+    msisdn   = params["MSISDN"]
+    bill_ref = params["BillRefNumber"]
+
+    Logger.info("C2B confirmed: TransID=#{trans_id} amount=#{amount} phone=#{msisdn} ref=#{bill_ref}")
+    # TODO: reconcile the payment in your database
+
+    json(conn, %{ResultCode: 0, ResultDesc: "Accepted"})
+  end
+end
+
+# lib/your_app_web/router.ex — add inside a scope block:
+# scope "/", YourAppWeb do
+#   pipe_through :api
+#   post "/mpesa/c2b/validate", MpesaC2BController, :validate
+#   post "/mpesa/c2b/confirm",  MpesaC2BController, :confirm
+# end
+`,
+  }
+}
+
+function c2bKtor(): GeneratedFile {
+  return {
+    filename: 'src/main/kotlin/com/yourapp/routes/MpesaC2BRoutes.kt',
+    language: 'kotlin',
+    content: `package com.yourapp.routes
+
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import org.slf4j.LoggerFactory
+
+private val c2bLogger = LoggerFactory.getLogger("MpesaC2BRoutes")
+
+fun Application.configureMpesaC2BRoutes() {
+    routing {
+        // POST /mpesa/c2b/validate
+        // Daraja calls this before processing a till/paybill payment.
+        // Return ResultCode 0 to accept or a non-zero code to reject.
+        // You have roughly 8 seconds to respond.
+        post("/mpesa/c2b/validate") {
+            val params = call.receiveNullable<Map<String, String>>() ?: emptyMap()
+            val transId  = params["TransID"]
+            val amount   = params["TransAmount"]
+            val msisdn   = params["MSISDN"]
+            val billRef  = params["BillRefNumber"]
+
+            c2bLogger.info("C2B validate: TransID=$transId amount=$amount phone=$msisdn ref=$billRef")
+
+            // TODO: validate bill reference against your records
+            call.respond(HttpStatusCode.OK, mapOf("ResultCode" to 0, "ResultDesc" to "Accepted"))
+        }
+
+        // POST /mpesa/c2b/confirm
+        // Daraja posts the confirmed payment here after funds settle.
+        // Return 200 immediately — this is informational.
+        post("/mpesa/c2b/confirm") {
+            val params  = call.receiveNullable<Map<String, String>>() ?: emptyMap()
+            val transId = params["TransID"]
+            val amount  = params["TransAmount"]
+            val msisdn  = params["MSISDN"]
+            val billRef = params["BillRefNumber"]
+
+            c2bLogger.info("C2B confirmed: TransID=$transId amount=$amount phone=$msisdn ref=$billRef")
+            // TODO: reconcile the payment in your database
+
+            call.respond(HttpStatusCode.OK, mapOf("ResultCode" to 0, "ResultDesc" to "Accepted"))
+        }
+    }
+}
+
+// Application.kt — call inside module():
+// configureMpesaC2BRoutes()
+`,
+  }
+}
+
+function c2bSpring(): GeneratedFile {
+  return {
+    filename: 'src/main/java/com/yourapp/controller/MpesaC2BController.java',
+    language: 'java',
+    content: `package com.yourapp.controller;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/mpesa/c2b")
+public class MpesaC2BController {
+
+    private static final Logger log = LoggerFactory.getLogger(MpesaC2BController.class);
+
+    /**
+     * POST /mpesa/c2b/validate
+     * Daraja calls this before processing a till/paybill payment.
+     * Return ResultCode 0 to accept or a non-zero code to reject.
+     * You have roughly 8 seconds to respond.
+     */
+    @PostMapping("/validate")
+    public ResponseEntity<Map<String, Object>> validate(@RequestBody Map<String, String> params) {
+        var transId  = params.get("TransID");
+        var amount   = params.get("TransAmount");
+        var msisdn   = params.get("MSISDN");
+        var billRef  = params.get("BillRefNumber");
+
+        log.info("C2B validate: TransID={} amount={} phone={} ref={}", transId, amount, msisdn, billRef);
+
+        // TODO: validate bill reference against your records
+        // Return a non-zero ResultCode to reject the payment
+        return ResponseEntity.ok(Map.of("ResultCode", 0, "ResultDesc", "Accepted"));
+    }
+
+    /**
+     * POST /mpesa/c2b/confirm
+     * Daraja posts the confirmed payment here after funds settle.
+     * Return 200 immediately — this is informational.
+     */
+    @PostMapping("/confirm")
+    public ResponseEntity<Map<String, Object>> confirm(@RequestBody Map<String, String> params) {
+        var transId = params.get("TransID");
+        var amount  = params.get("TransAmount");
+        var msisdn  = params.get("MSISDN");
+        var billRef = params.get("BillRefNumber");
+
+        log.info("C2B confirmed: TransID={} amount={} phone={} ref={}", transId, amount, msisdn, billRef);
+        // TODO: reconcile the payment in your database
+
+        return ResponseEntity.ok(Map.of("ResultCode", 0, "ResultDesc", "Accepted"));
+    }
+}
+`,
+  }
+}
+
+function c2bVapor(): GeneratedFile {
+  return {
+    filename: 'Sources/App/Controllers/MpesaC2BController.swift',
+    language: 'swift',
+    content: `import Vapor
+
+struct C2BParams: Content {
+    let TransID: String?
+    let TransAmount: String?
+    let MSISDN: String?
+    let BillRefNumber: String?
+}
+
+struct C2BResult: Content {
+    let ResultCode: Int
+    let ResultDesc: String
+}
+
+// POST /mpesa/c2b/validate
+// Daraja calls this before processing a till/paybill payment.
+// Return ResultCode 0 to accept or a non-zero code to reject.
+// You have roughly 8 seconds to respond.
+func c2bValidate(req: Request) async throws -> C2BResult {
+    let params = try req.content.decode(C2BParams.self)
+
+    req.logger.info("C2B validate: TransID=" + (params.TransID ?? "") +
+        " amount=" + (params.TransAmount ?? "") +
+        " phone="  + (params.MSISDN ?? "") +
+        " ref="    + (params.BillRefNumber ?? ""))
+
+    // TODO: validate bill reference against your records
+    return C2BResult(ResultCode: 0, ResultDesc: "Accepted")
+}
+
+// POST /mpesa/c2b/confirm
+// Daraja posts the confirmed payment here after funds settle.
+// Return 200 immediately — this is informational.
+func c2bConfirm(req: Request) async throws -> C2BResult {
+    let params = try req.content.decode(C2BParams.self)
+
+    req.logger.info("C2B confirmed: TransID=" + (params.TransID ?? "") +
+        " amount=" + (params.TransAmount ?? "") +
+        " phone="  + (params.MSISDN ?? "") +
+        " ref="    + (params.BillRefNumber ?? ""))
+
+    // TODO: reconcile the payment in your database
+    return C2BResult(ResultCode: 0, ResultDesc: "Accepted")
+}
+
+// Sources/App/configure.swift — register routes:
+// app.post("mpesa", "c2b", "validate", use: c2bValidate)
+// app.post("mpesa", "c2b", "confirm",  use: c2bConfirm)
+`,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Environment variable templates
 // ---------------------------------------------------------------------------
 
@@ -1555,6 +2104,10 @@ const STK_GENERATORS: Record<Stack, () => GeneratedFile> = {
   'gin': stkGin,
   'rails': stkRails,
   'aspnet': stkAspnet,
+  'phoenix': stkPhoenix,
+  'ktor':    stkKtor,
+  'spring':  stkSpring,
+  'vapor':   stkVapor,
 }
 
 const C2B_GENERATORS: Record<Stack, () => GeneratedFile> = {
@@ -1569,6 +2122,10 @@ const C2B_GENERATORS: Record<Stack, () => GeneratedFile> = {
   'gin': c2bGin,
   'rails': c2bRails,
   'aspnet': c2bAspnet,
+  'phoenix': c2bPhoenix,
+  'ktor':    c2bKtor,
+  'spring':  c2bSpring,
+  'vapor':   c2bVapor,
 }
 
 const ENV_GENERATORS: Record<EnvPlatform, () => GeneratedFile> = {

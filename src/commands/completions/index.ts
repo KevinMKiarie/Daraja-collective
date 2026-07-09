@@ -34,7 +34,7 @@ _daraja_completions() {
         return
       fi ;;
     --stack)
-      COMPREPLY=( $(compgen -W "express express-ts fastify nextjs fastapi flask django laravel gin rails aspnet" -- "\${cur}") )
+      COMPREPLY=( $(compgen -W "express express-ts fastify nextjs fastapi flask django laravel gin rails aspnet phoenix ktor spring vapor" -- "\${cur}") )
       return ;;
     --platform)
       COMPREPLY=( $(compgen -W "dotenv github-actions vercel docker railway" -- "\${cur}") )
@@ -184,7 +184,7 @@ complete -c daraja -n __fish_use_subcommand -a update       -d 'Check for CLI up
 
 # generate --stack values
 complete -c daraja -n '__fish_seen_subcommand_from generate gen' -l stack -r \\
-  -a 'express express-ts fastify nextjs fastapi flask django laravel gin rails aspnet' \\
+  -a 'express express-ts fastify nextjs fastapi flask django laravel gin rails aspnet phoenix ktor spring vapor' \\
   -d 'Target framework'
 
 # generate --platform values
