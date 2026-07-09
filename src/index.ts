@@ -19,6 +19,9 @@ import { configCommand } from './commands/config/index.js'
 import { generateCommand } from './commands/generate/index.js'
 import { ecosystemCommand } from './commands/ecosystem/index.js'
 import { serveCommand } from './commands/serve/index.js'
+import { mockCommand } from './commands/mock/index.js'
+import { completionsCommand } from './commands/completions/index.js'
+import { updateCommand } from './commands/update/index.js'
 
 declare const __VERSION__: string
 
@@ -38,6 +41,9 @@ program.addCommand(keygenCommand)
 program.addCommand(generateCommand)
 program.addCommand(ecosystemCommand)
 program.addCommand(serveCommand)
+program.addCommand(mockCommand)
+program.addCommand(completionsCommand)
+program.addCommand(updateCommand)
 program.addCommand(stkCommand)
 program.addCommand(c2bCommand)
 program.addCommand(b2cCommand)
